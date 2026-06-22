@@ -52,7 +52,8 @@ class LobbyManager:
 
     # ── 관전자 전환 ───────────────────────────────────────────────────────────
 
-    def switch_to_spectator(self) -> bool:
+    def switch_to_spectator(self, log_fn=None) -> bool:
+        _log = log_fn or print
         lobby = self.get_current_lobby()
         if not lobby:
             return False
@@ -74,7 +75,7 @@ class LobbyManager:
             try:
                 resp = self._req(method, path, json=body)
                 if resp.status_code in (200, 204):
-                    print(f"[Lobby] 관전자 전환 성공: {method} {path}")
+                    _log(f"[Lobby] 관전자 전환 성공: {method} {path}")
                     return True
             except Exception:
                 pass
@@ -322,7 +323,7 @@ class LobbyManager:
                         accepted_ids.add(inv_id)
                         _log("[Lobby] 수락 완료 — 관전자 전환 시도 중...")
                         time.sleep(2)
-                        if self.switch_to_spectator():
+                        if self.switch_to_spectator(log_fn=_log):
                             _log("[Lobby] 관전자 전환 완료")
                         else:
                             _log("[Lobby] 관전자 전환 실패 — 수동으로 전환해주세요")
