@@ -303,14 +303,19 @@ class LobbyManager:
                     if in_progress_game_id:
                         _log(f"[Lobby] 게임 진행 중 감지 (game_id={in_progress_game_id})")
 
-                # InProgress → EndOfGame 아닌 상태 전환: 전원 퇴장 케이스
+                # InProgress → EndOfGame 아닌 상태 전환: 관전자는 EOG를 거치지 않으므로 EOG 데이터로 구분
                 if (prev_phase == "InProgress"
                         and phase not in ("InProgress", "EndOfGame")
                         and phase is not None
                         and in_progress_game_id
                         and in_progress_game_id not in self._eog_saved_ids):
-                    _log(f"[Lobby] 게임 조기 종료 감지 (game_id={in_progress_game_id}) — 탈주 기록 저장")
-                    self._save_aborted_game(in_progress_game_id, log_fn=_log, teams=in_progress_teams)
+                    eog_data = self._get_eog_data()
+                    if eog_data and int(eog_data.get("gameId", 0)) == in_progress_game_id:
+                        _log(f"[Lobby] 관전자 정상 종료 감지 (game_id={in_progress_game_id}) — EOG 데이터로 저장")
+                        self._try_save_game(in_progress_game_id, eog_data=eog_data, log_fn=_log)
+                    else:
+                        _log(f"[Lobby] 게임 조기 종료 감지 (game_id={in_progress_game_id}) — 탈주 기록 저장")
+                        self._save_aborted_game(in_progress_game_id, log_fn=_log, teams=in_progress_teams)
 
                 if phase != "InProgress":
                     in_progress_game_id = None

@@ -17,7 +17,7 @@ from league_client_api import (
 )
 from firebase_admin import firestore
 
-GAME_ID = "8267914888"
+GAME_ID = "8276158174"
 
 
 def main():
